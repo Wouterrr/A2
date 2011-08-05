@@ -60,7 +60,7 @@ abstract class A2_Core extends Acl {
 	public function __construct($_name = 'a2')
 	{
 		// Read config
-		$config = Kohana::config($_name);
+		$config = Kohana::$config->load($_name);
 
 		// Create instance of Authenticate lib (a1, auth, authlite)
 		$instance = new ReflectionMethod($config->lib['class'],'instance');
