@@ -32,8 +32,15 @@
 
 abstract class A2_Core extends Acl {
 
-	public    $a1;          // the Authentication library (used to retrieve user)
-	protected $_guest_role; // name of the guest role (used when no user is logged in)
+	/**
+	 * Config object
+	 */
+	protected $_config;
+
+	/**
+	 * Authentication instance
+	 */
+	protected $_auth;
 
 	/**
 	 * Return an instance of A2.
@@ -60,31 +67,25 @@ abstract class A2_Core extends Acl {
 	public function __construct($_name = 'a2')
 	{
 		// Read config
-		$config = Kohana::$config->load($_name);
+		$this->_config = Kohana::$config->load($_name);
 
 		// Create instance of Authenticate lib (a1, auth, authlite)
-		$instance = new ReflectionMethod($config->lib['class'],'instance');
+		$instance = new ReflectionMethod($this->_config->lib['class'], 'instance');
+		$params   = Arr::get($this->_config->lib, 'params', array());
 
-		$params = !empty($config->lib['params']) 
-			? $config->lib['params'] 
-			: array();
-
-		$this->a1 = $instance->invokeArgs(NULL, $params);
-
-		// Throw exceptions?
-		$this->_exception = $config->exception;
+		$this->_auth = $instance->invokeArgs(NULL, $params);
 
 		// Guest role
-		$this->_guest_role = $config['guest_role'];
+		$this->_guest_role = $this->_config['guest_role'];
 
 		// Add Guest Role as role
-		if ( ! array_key_exists($this->_guest_role,$config['roles']))
+		if ( ! array_key_exists($this->_config['guest_role'], $this->_config['roles']))
 		{
-			$this->add_role($this->_guest_role);
+			$this->add_role($this->_config['guest_role']);
 		}
 
 		// Load ACL data
-		$this->load($config);
+		$this->load();
 	}
 
 	/**
@@ -95,34 +96,34 @@ abstract class A2_Core extends Acl {
 	 *
 	 * @param  array|Kohana_Config  configiration data
 	 */
-	public function load($config)
+	public function load()
 	{
 		// Roles
-		if ( isset($config['roles']))
+		if ( isset($this->_config['roles']))
 		{
-			foreach ( $config['roles'] as $role => $parent)
+			foreach ( $this->_config['roles'] as $role => $parent)
 			{
 				$this->add_role($role,$parent);
 			}
 		}
 
 		// Resources
-		if ( isset($config['resources']))
+		if ( isset($this->_config['resources']))
 		{
-			foreach($config['resources'] as $resource => $parent)
+			foreach ( $this->_config['resources'] as $resource => $parent)
 			{
 				$this->add_resource($resource,$parent);
 			}
 		}
 
 		// Rules
-		if(isset($config['rules']))
+		if ( isset($this->_config['rules']))
 		{
-			foreach(array('allow','deny') as $method)
+			foreach ( array('allow','deny') as $method)
 			{
-				if ( isset($config['rules'][$method]))
+				if ( isset($this->_config['rules'][$method]))
 				{
-					foreach ( $config['rules'][$method] as $rule)
+					foreach ( $this->_config['rules'][$method] as $rule)
 					{
 						// create variables
 						$role = $resource = $privilege = $assertion = NULL;
@@ -174,11 +175,11 @@ abstract class A2_Core extends Acl {
 		if ( ! is_bool($exception))
 		{
 			// take config value
-			$exception = $this->_exception;
+			$exception = $this->_config['exception'];
 		}
 
 		// retrieve user
-		$role = ($user = $this->a1->get_user()) ? $user : $this->_guest_role;
+		$role = ($user = $this->_auth->get_user()) ? $user : $this->_config['guest_role'];
 
 		$result = $this->is_allowed($role,$resource,$privilege);
 
@@ -209,7 +210,7 @@ abstract class A2_Core extends Acl {
 				{
 					if ( $message = Kohana::message('a2', $r . '.' . $p))
 					{
-						throw new A2_Exception($message);
+						throw new $this->_config['exception_type']($message);
 					}
 				}
 			}
@@ -224,7 +225,7 @@ abstract class A2_Core extends Acl {
 	 */
 	public function logged_in() 
 	{
-		return $this->a1->logged_in();
+		return $this->_auth->logged_in();
 	}
 
 	/**
@@ -232,7 +233,15 @@ abstract class A2_Core extends Acl {
 	 */
 	public function get_user()
 	{
-		return $this->a1->get_user();
+		return $this->_auth->get_user();
+	}
+
+	/**
+	 * Returns authentication instance
+	 */
+	public function auth()
+	{
+		return $this->_auth;
 	}
 
 } // End A2 lib

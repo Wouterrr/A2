@@ -19,9 +19,14 @@ return array(
 	),
 
 	/**
-	 * Throws an a2_exception when authentication fails
+	 * Throws an exception when authorization fails.
 	 */
 	'exception' => FALSE,
+
+	/**
+	 * Exception class to throw when authorization fails (eg 'HTTP_Exception_401')
+	 */
+	'exception_type' => 'a2_exception',
 
 	/*
 	 * The ACL Roles (String IDs are fine, use of ACL_Role_Interface objects also possible)
