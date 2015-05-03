@@ -1,0 +1,26 @@
+{
+  "name": "wouterrr/a1",
+  "type": "kohana-module",
+  "description": "Combines Authentication & Authorization for Kohana",
+  "keywords": ["kohana", "authentication", "authorization", "acl"],
+  "homepage": "https://github.com/Wouterrr/A2",
+  "license": "BEER-WARE",
+  "authors": [
+    {
+      "name": "Wouter Wiegmans"
+    }
+  ],
+  "support": {
+    "issues":   "https://github.com/Wouterrr/A2/issues",
+    "source":   "https://github.com/Wouterrr/A2"
+  },
+  "suggest": {
+    "wouterrr/a1": "dev-master",
+    "wouterrr/acl": "dev-master"
+  },
+  "require": {
+    "composer/installers": "~1.0",
+    "kohana/core": ">=3.3",
+    "php": ">=5.3.0"
+  }
+}
