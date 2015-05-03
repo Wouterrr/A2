@@ -1,5 +1,5 @@
 {
-  "name": "wouterrr/a1",
+  "name": "wouterrr/a2",
   "type": "kohana-module",
   "description": "Combines Authentication & Authorization for Kohana",
   "keywords": ["kohana", "authentication", "authorization", "acl"],
